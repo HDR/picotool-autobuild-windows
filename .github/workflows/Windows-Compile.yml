@@ -42,7 +42,7 @@ jobs:
           cd build
           realpath .
           realpath ..
-          cmake .. -DPICO_SDK_PATH=../../pico-sdk -DLIBUSB_LIBRARIES="${{ github.workspace }}/VS2019/MS64/dll/libusb-1.0.lib" -DLIBUSB_INCLUDE_DIR="${{ github.workspace }}/include/libusb-1.0"
+          cmake .. -DPICO_SDK_PATH=../../pico-sdk -DLIBUSB_LIBRARIES="${{ github.workspace }}/VS2019/MS64/static/libusb-1.0.lib" -DLIBUSB_INCLUDE_DIR="${{ github.workspace }}/include/libusb-1.0"
           cmake --build . --config Release
           cp "${{ github.workspace }}\VS2019\MS64\dll\libusb-1.0.dll" "${{ github.workspace }}\picotool\build\Release"
           
