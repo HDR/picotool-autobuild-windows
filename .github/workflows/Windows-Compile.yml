@@ -1,0 +1,52 @@
+name: Build on Windows
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout picotool
+        uses: actions/checkout@v2
+        with:
+          path: picotool
+
+      - name: Checkout pico-sdk/master
+        uses: actions/checkout@v2
+        with:
+          repository: raspberrypi/pico-sdk
+          ref: master
+          path: pico-sdk
+
+      - name: Checkout pico-sdk submodules
+        working-directory: ${{github.workspace}}/pico-sdk
+        run: git submodule update --init
+        
+      - uses: suisei-cn/actions-download-file@v1.3.0
+        name: Download LibUSB
+        with:
+          url: https://github.com/libusb/libusb/releases/download/v1.0.24/libusb-1.0.24.7z
+          target: ${{github.workspace}}
+        
+      - name: UnZip LibUSB
+        run: 7z x ${{github.workspace}}/libusb-1.0.24.7z -aoa
+
+      - name: Build Project
+        working-directory: ${{github.workspace}}/picotool
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          realpath .
+          realpath ..
+          cmake .. -DPICO_SDK_PATH=../../pico-sdk -DLIBUSB_LIBRARIES="${{ github.workspace }}/VS2019/MS64/dll/libusb-1.0.lib" -DLIBUSB_INCLUDE_DIR="${{ github.workspace }}/include/libusb-1.0"
+          cmake --build . --config Release
+          cp "${{ github.workspace }}\VS2019\MS64\dll\libusb-1.0.dll" "${{ github.workspace }}\picotool\build\Release"
+          
+      - uses: actions/upload-artifact@v3
+        with:
+          name: picotool
+          path: ${{ github.workspace }}\picotool\build\Release\
